@@ -1,1 +1,19 @@
-https://kahoot.it/challenge/84387498-97d5-4d82-ae4e-eabb1c94cf58_1728872669784?&uid=U2FuZHJh
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Links</title>
+</head>
+<body>
+    <h1>Useful Links</h1>
+    
+    <p>
+        <a href="https://kahoot.it/challenge/84387498-97d5-4d82-ae4e-eabb1c94cf58_1728872669784?&uid=U2FuZHJh" target="_blank">Kahoot Challenge</a>
+    </p>
+    <p>
+        <a href="https://codepen.io/Sandra-Erskine/pen/NWQaKzg" target="_blank">CodePen Example</a>
+    </p>
+
+</body>
+</html>
