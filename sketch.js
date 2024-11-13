@@ -1,57 +1,160 @@
-let eyeLeftX, eyeRightX, noseY, mouthY, titleSize;
-let eyeLeftSpeed, eyeRightSpeed, noseSpeed, mouthSpeed, diagonalSpeed;
-let diagonalX, diagonalY;
+ // Players and variables //
+let player;
+let playerSpeed = 5;
+
+// Obstacles //
+let obstacles = [];
+let obstacleCount = 2;
+
+// Exits //
+let exit;
+let hasWon = false;
 
 function setup() {
-  createCanvas(400, 400);
-  background(255);
-  eyeLeftX = 110;
-  eyeRightX = 290;
-  noseY = 200;
-  mouthY = 255;
-  titleSize = 32;
-  eyeLeftSpeed = random(1, 3);
-  eyeRightSpeed = random(1, 3);
-  noseSpeed = random(1, 3);
-  mouthSpeed = random(1, 3);
-  diagonalSpeed = random(1, 3);
-  diagonalX = 200;
-  diagonalY = 130;
+  createCanvas(600, 400);
+  
+  // Put player at the center of the canvas //
+  player = new Player(width / 2, height / 2);
+  
+  // Create multiple obstacles with random sizes and colors //
+  for (let i = 0; i < obstacleCount; i++) {
+    obstacles.push(new Obstacle(random(width), random(height)));
+  }
+  
+  // Exit Points //
+  exit = new Exit(width - 50, height - 50);
 }
 
 function draw() {
-  background(255);
-  fill(213, 187, 161);
-  noStroke();
-  ellipse(eyeLeftX, 200, 30, 60);
-  ellipse(eyeRightX, 200, 30, 60);
-  eyeLeftX += eyeLeftSpeed;
-  eyeRightX += eyeRightSpeed;
-  if (eyeLeftX > 400 || eyeLeftX < 0) eyeLeftSpeed *= -1;
-  if (eyeRightX > 400 || eyeRightX < 0) eyeRightSpeed *= -1;
-  fill(213, 187, 161);
-  ellipse(200, noseY, 30, 60); 
-  noseY += noseSpeed;
-  if (noseY > 300 || noseY < 100) noseSpeed *= -1;
-  fill(240, 147, 161);
-  ellipse(200, mouthY, 150, 30);
-  mouthY += mouthSpeed;
-  if (mouthY > 300 || mouthY < 250) mouthSpeed *= -1;
-  fill(109, 39, 0);
-  ellipse(diagonalX, diagonalY, 120, 70);
-  diagonalX += diagonalSpeed;
-  diagonalY += diagonalSpeed;
-  if (diagonalX > 400 || diagonalX < 0) diagonalSpeed *= -1;
-  if (diagonalY > 400 || diagonalY < 0) diagonalSpeed *= -1;
-  fill(0);
-  textSize(titleSize);
-  textAlign(CENTER, TOP);
-  text("SELF PORTRAIT", width / 2, height / 10);
-  if (frameCount % 60 == 0) { 
-    if (titleSize < 160) {
-      titleSize += 8;
-    } else {
-      titleSize -= 8;
+  background(220);
+  
+  // Move player based on keyboard input //
+  player.update();
+  player.display();
+  
+  // Move and show obstacles //
+  for (let obs of obstacles) {
+    obs.update();
+    obs.display();
+  }
+  
+  // show the exit //
+  exit.display();
+  
+  // Check if player reaches the exit //
+  if (player.intersects(exit)) {
+    hasWon = true;
+  }
+  
+  // Display win message if player reached the exit //
+  if (hasWon) {
+    textSize(32);
+    fill(0);
+    text('You Won!', width / 2 - 80, height / 2);
+  }
+}
+
+function keyPressed() {
+  if (keyCode === LEFT_ARROW) {
+    player.setDirection(-1, 0);
+  } else if (keyCode === RIGHT_ARROW) {
+    player.setDirection(1, 0);
+  } else if (keyCode === UP_ARROW) {
+    player.setDirection(0, -1);
+  } else if (keyCode === DOWN_ARROW) {
+    player.setDirection(0, 1);
+  }
+}
+
+function keyReleased() {
+  player.setDirection(0, 0);
+}
+
+function mousePressed() {
+  // Add a new non-moving obstacle at the mouse position
+  obstacles.push(new Obstacle(mouseX, mouseY, false));
+}
+
+// Player class //
+class Player {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.size = 20;
+    this.xSpeed = 0;
+    this.ySpeed = 0;
+  }
+  
+  update() {
+    this.x += this.xSpeed;
+    this.y += this.ySpeed;
+    
+    // Keep player within canvas boundaries //
+    if (this.x < 0) this.x = width;
+    if (this.x > width) this.x = 0;
+    if (this.y < 0) this.y = height;
+    if (this.y > height) this.y = 0;
+  }
+  
+  setDirection(x, y) {
+    this.xSpeed = x * playerSpeed;
+    this.ySpeed = y * playerSpeed;
+  }
+  
+  intersects(exit) {
+    let d = dist(this.x, this.y, exit.x, exit.y);
+    return d < this.size + exit.size;
+  }
+  
+  display() {
+    fill(0, 0, 255);
+    noStroke();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}
+
+// Obstacle class //
+class Obstacle {
+  constructor(x, y, isMoving = true) {
+    this.x = x;
+    this.y = y;
+    this.size = random(20, 50);
+    this.color = color(random(255), random(255), random(255));
+    this.isMoving = isMoving;
+    this.speed = random(1, 3);
+  }
+  
+  update() {
+    if (this.isMoving) {
+      this.x += random(-this.speed, this.speed);
+      this.y += random(-this.speed, this.speed);
+      
+      // Wrap obstacles around the screen
+      if (this.x < 0) this.x = width;
+      if (this.x > width) this.x = 0;
+      if (this.y < 0) this.y = height;
+      if (this.y > height) this.y = 0;
     }
+  }
+  
+  display() {
+    fill(this.color);
+    noStroke();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}
+
+// Exit class
+class Exit {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.size = 30;
+  }
+  
+  display() {
+    fill(255, 0, 0);
+    noStroke();
+    rect(this.x, this.y, this.size, this.size);
   }
 }
